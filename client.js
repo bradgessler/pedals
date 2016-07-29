@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const net = require('net');
 const socket = '/tmp/pedals.sock';
 const JsonSocket = require('json-socket');
@@ -25,15 +27,18 @@ program
   .option('-a, --async', 'Run command per pedal press')
   .parse(process.argv);
 
+const pedal = program.pedal || "center";
+const sync = !(program.async || false);
+const command = program.command;
 var ready = true;
 
 var dispatch = function(event){
   if(ready && event.name === "pedaldown"){
-    if(event.pedal === program.pedal){
-      if(!program.async) { ready = false }
+    if(event.pedal === pedal){
       if(ready){
-        console.log("== " + event.pedal + " pedal pressed, running " + program.command);
-        proc = sh(program.command)
+        if(sync) { ready = false }
+        console.log("== " + event.pedal + " pedal pressed, running " + command);
+        proc = sh(command)
         proc.on("close", () => { ready = true })
       } else {
         console.log("Not ready, skipping")
@@ -54,5 +59,5 @@ var sh = function(cmd, callback){
   return proc;
 }
 
-console.log("Listening for " + program.pedal + " pedal press to run " + program.command);
+console.log("Listening for " + pedal + " pedal press to run " + command);
 

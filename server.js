@@ -1,7 +1,6 @@
+#!/usr/bin/env node
 
 const HID = require('node-hid')
-const devices = HID.devices()
-const pedal = new HID.HID(1523, 255)
 const clients = [];
 const unixSocket = '/tmp/pedals.sock';
 const JsonSocket = require('json-socket');
@@ -12,6 +11,17 @@ const mapping = {
   0x0400: {"name": "pedaldown", "pedal": "right"}
 }
 
+var connectPedal = () => {
+  try {
+    return new HID.HID(1523, 255)
+  }
+  catch (e) {
+    console.error(e)
+    setTimeout(connectPedal, 1000)
+  }
+}
+
+
 var pedalEvent = function(data){
   code = data.readInt16BE()
   event = mapping[code] || {}
@@ -21,14 +31,20 @@ var pedalEvent = function(data){
 
 var notifyClients = (data) => {
   event = pedalEvent(data)
+  console.log(event.code.toString(2));
   console.log("Notifying " + clients.length + " client(s)", event)
   clients.forEach((c) => {
     c.sendMessage(event)
   })
 }
 
+var pedal = connectPedal()
+
 pedal.on("data", notifyClients)
-pedal.on("error", console.error)
+pedal.on("error", (msg) => {
+  console.error(msg)
+  connectPedal()
+})
 
 var net = require('net');
 
