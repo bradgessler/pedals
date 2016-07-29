@@ -11,7 +11,7 @@ client.on('connect', () => {
   console.log('Connected');
 });
 client.on('message', (data) => {
-  console.log('Received: ' + JSON.stringify(data));
+  // console.log('Received: ' + JSON.stringify(data));
   dispatch(data);
 });
 client.on('close', () => {
@@ -25,11 +25,13 @@ program
   .option('-p, --pedal [value]', 'Pick a pedal. left, right, or center')
   .option('-c, --command [value]', 'Command you want to run')
   .option('-a, --async', 'Run command per pedal press')
+  .option('-r, --clear-screen', 'Clear terminal before each run')
   .parse(process.argv);
 
 const pedal = program.pedal || "center";
 const sync = !(program.async || false);
 const command = program.command;
+const clearScreen = program.clearScreen;
 var ready = true;
 
 var dispatch = function(event){
@@ -37,6 +39,7 @@ var dispatch = function(event){
     if(event.pedal === pedal){
       if(ready){
         if(sync) { ready = false }
+        if(clearScreen) { process.stdout.write('\x1B[2J\x1B[0f'); }
         console.log("== " + event.pedal + " pedal pressed, running " + command);
         proc = sh(command)
         proc.on("close", () => { ready = true })
@@ -51,10 +54,13 @@ const exec = require('child_process').exec;
 
 var sh = function(cmd, callback){
   const proc = exec(cmd);
-  proc.stdout.on('data', console.log);
-  proc.stderr.on('data', console.error);
+  proc.stdout.pipe(process.stdout);
+  proc.stderr.pipe(process.stderr);
+  proc.stdin.pipe(process.stdin);
   proc.on('close', (code) => {
-    console.log(`== process exited with code ${code}`);
+    if(code !== 0){
+      console.log(`!! process exited with code ${code}`);
+    }
   });
   return proc;
 }
