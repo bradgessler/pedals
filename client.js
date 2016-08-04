@@ -28,7 +28,7 @@ program
   .option('-r, --clear-screen', 'Clear terminal before each run')
   .parse(process.argv);
 
-const pedal = program.pedal || "center";
+const pedal = program.pedal || false; 
 const sync = !(program.async || false);
 const command = program.command;
 const clearScreen = program.clearScreen;
@@ -36,7 +36,7 @@ var ready = true;
 
 var dispatch = function(event){
   if(ready && event.name === "pedaldown"){
-    if(event.pedal === pedal){
+    if(event.pedal === pedal || pedal === false){
       if(ready){
         if(sync) { ready = false }
         if(clearScreen) { process.stdout.write('\x1B[2J\x1B[0f'); }
