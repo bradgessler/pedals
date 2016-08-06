@@ -4,8 +4,8 @@ const net = require('net');
 const socket = '/tmp/pedals.sock';
 const JsonSocket = require('json-socket');
 const client = new JsonSocket(new net.Socket());
-
-client.connect(socket);
+const fs = require('fs');
+const pedalServer = require("./server.js").pedalServer
 
 client.on('connect', () => {
   console.log('Connected');
@@ -15,10 +15,20 @@ client.on('message', (data) => {
   dispatch(data);
 });
 client.on('close', () => {
-  console.log('Connection closed');
+  // console.log('Connection closed');
+});
+client.on('error', (err) => {
+  console.log("Starting pedal server");
+  fs.unlink(socket);
+  pedalServer.listen(socket);
+  pedalServer.on("listening", () => {
+    client.connect(socket);
+  })
 });
 
-var program = require('commander');
+client.connect(socket);
+
+const program = require('commander');
 
 program
   .version('0.0.1')
@@ -28,13 +38,13 @@ program
   .option('-r, --clear-screen', 'Clear terminal before each run')
   .parse(process.argv);
 
-const pedal = program.pedal || false; 
+const pedal = program.pedal || false;
 const sync = !(program.async || false);
 const command = program.command;
 const clearScreen = program.clearScreen;
 var ready = true;
 
-var dispatch = function(event){
+const dispatch = function(event){
   if(ready && event.name === "pedaldown"){
     if(event.pedal === pedal || pedal === false){
       if(ready){
@@ -52,7 +62,7 @@ var dispatch = function(event){
 
 const exec = require('child_process').exec;
 
-var sh = function(cmd, callback){
+const sh = function(cmd, callback){
   const proc = exec(cmd);
   proc.stdout.pipe(process.stdout);
   proc.stderr.pipe(process.stderr);
