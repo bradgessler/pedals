@@ -68,6 +68,9 @@ const sh = function(cmd, callback){
   proc.stderr.pipe(process.stderr);
   proc.stdin.pipe(process.stdin);
   proc.on('close', (code) => {
+    proc.stdout.unpipe(process.stdout);
+    proc.stderr.unpipe(process.stderr);
+    proc.stdin.unpipe(process.stdin);
     if(code !== 0){
       console.log(`!! process exited with code ${code}`);
     }
