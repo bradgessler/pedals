@@ -19,6 +19,7 @@ const pedalEvent = function(data){
 
 const notifyClients = (data) => {
   event = pedalEvent(data)
+  // TODO: Implement a statemachine that reads the binary bits for pressed/unpressed
   // console.log(event.code.toString(2));
   // console.log("Notifying " + clients.length + " client(s)", event)
   clients.forEach((c) => {

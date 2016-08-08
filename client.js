@@ -19,7 +19,12 @@ client.on('close', () => {
 });
 client.on('error', (err) => {
   console.log("Starting pedal server");
-  fs.unlink(socket);
+  fs.unlink(socket, (err) => {
+    // Ignore this if the socket doesn't exist.
+    if(err && err.code != "ENOENT"){
+      console.error(err)
+    }
+  });
   pedalServer.listen(socket);
   pedalServer.on("listening", () => {
     client.connect(socket);
