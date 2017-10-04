@@ -1,0 +1,30 @@
+{
+  "name": "pedals",
+  "version": "1.0.0",
+  "description": "HID pedal lib",
+  "main": "client.js",
+  "dependencies": {
+    "json-socket": "^0.1.2",
+    "node-hid": "^0.5.1",
+    "shelljs": "^0.7.3",
+    "commander": "^2.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "client.js -c \"echo 'hello world'\"",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bradgessler/pedals.git"
+  },
+  "keywords": [
+    "stupid"
+  ],
+  "author": "Brad Gessler",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bradgessler/pedals/issues"
+  },
+  "homepage": "https://github.com/bradgessler/pedals#readme"
+}
